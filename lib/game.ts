@@ -1,5 +1,5 @@
 import * as P from 'pixi.js'
-import TextureTilingSprite from './texture-tiling-sprite'
+import Scroller from './scroller'
 
 interface GameOpts {
     RESOURCE_URL   : string
@@ -10,15 +10,9 @@ interface GameOpts {
 }
 
 export default class Game {
-  _app           : P.Application
-  _resourceUrl   : string
-  _textureWidth  : number
-  _textureHeight : number
-  _farTexture    : string
-  _midTexture    : string
-
-  _far! : TextureTilingSprite
-  _mid! : TextureTilingSprite
+  _app         : P.Application
+  _resourceUrl : string
+  _scroller    : Scroller;
 
   constructor(app : P.Application, {
       RESOURCE_URL
@@ -27,46 +21,33 @@ export default class Game {
     , FAR_TEXTURE
     , MID_TEXTURE
   } : GameOpts) {
+    this._bind()
+
     this._app = app
     this._resourceUrl = RESOURCE_URL
-    this._textureWidth = TEXTURE_WIDTH
-    this._textureHeight = TEXTURE_HEIGHT
-    this._farTexture = FAR_TEXTURE
-    this._midTexture = MID_TEXTURE
-    this._bind()
+    this._scroller = new Scroller(this._app.stage, {
+        TEXTURE_WIDTH
+      , TEXTURE_HEIGHT
+      , FAR_TEXTURE
+      , MID_TEXTURE
+      , fullUrl: this._fullUrl
+    })
   }
 
   _bind() :void {
     this.update = this.update.bind(this)
+    this._fullUrl = this._fullUrl.bind(this)
   }
 
   start() : void {
-    this._far = this
-      ._renderTilingSprite(this._farTexture, 0, 0, 0.128)
-    this._mid = this
-      ._renderTilingSprite(this._midTexture, 0, this._textureHeight / 2, 0.64)
     this._app.ticker.add(this.update)
   }
 
   update() : void {
-    this._far.update()
-    this._mid.update()
+    this._scroller.update()
   }
 
   dispose() : void {
-  }
-
-  _renderTilingSprite(url : string, x : number, y : number, deltaX : number) : TextureTilingSprite {
-    const sprite = new TextureTilingSprite({
-        url: this._fullUrl(url)
-      , x
-      , y
-      , textureWidth: this._textureWidth
-      , textureHeight: this._textureHeight
-      , deltaX
-    })
-    this._app.stage.addChild(sprite)
-    return sprite
   }
 
   _fullUrl(url : string) : string {
