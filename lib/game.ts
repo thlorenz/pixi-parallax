@@ -1,4 +1,5 @@
 import * as P from 'pixi.js'
+import TextureTilingSprite from './texture-tiling-sprite'
 
 interface GameOpts {
     RESOURCE_URL   : string
@@ -16,8 +17,8 @@ export default class Game {
   _farTexture    : string
   _midTexture    : string
 
-  _far! : P.extras.TilingSprite
-  _mid! : P.extras.TilingSprite
+  _far! : TextureTilingSprite
+  _mid! : TextureTilingSprite
 
   constructor(app : P.Application, {
       RESOURCE_URL
@@ -41,33 +42,29 @@ export default class Game {
 
   start() : void {
     this._far = this
-      ._renderTilingSprite(this._farTexture, 0, 0)
+      ._renderTilingSprite(this._farTexture, 0, 0, 0.128)
     this._mid = this
-      ._renderTilingSprite(this._midTexture, 0, this._textureHeight / 2)
+      ._renderTilingSprite(this._midTexture, 0, this._textureHeight / 2, 0.64)
     this._app.ticker.add(this.update)
   }
 
   update() : void {
-    this._far.tilePosition.x -= 0.128
-    this._mid.tilePosition.x -= 0.64
+    this._far.update()
+    this._mid.update()
   }
 
   dispose() : void {
   }
 
-  _renderTilingSprite(url : string, x : number, y : number) : P.extras.TilingSprite {
-    const texture = P.Texture.fromImage(this._fullUrl(url))
-    // need predefined width/height here, as the texture.baseTexture.{width, height}
-    // always return 100 until they are rendered
-    const sprite = new P.extras.TilingSprite(
-        texture
-      , this._textureWidth
-      , this._textureHeight)
-
-    sprite.position.x = x
-    sprite.position.y = y
-    sprite.tilePosition.x = 0
-    sprite.tilePosition.y = 0
+  _renderTilingSprite(url : string, x : number, y : number, deltaX : number) : TextureTilingSprite {
+    const sprite = new TextureTilingSprite({
+        url: this._fullUrl(url)
+      , x
+      , y
+      , textureWidth: this._textureWidth
+      , textureHeight: this._textureHeight
+      , deltaX
+    })
     this._app.stage.addChild(sprite)
     return sprite
   }
