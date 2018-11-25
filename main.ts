@@ -5,12 +5,13 @@ import * as P from 'pixi.js'
 const RESOURCE_URL = 'http://localhost:1235/'
 P.loader.baseUrl = RESOURCE_URL
 
-const CANVAS_WIDTH   : number = 512
-const CANVAS_HEIGHT  : number = 384
-const TEXTURE_WIDTH  : number = 512
-const TEXTURE_HEIGHT : number = 256
-const FAR_TEXTURE    : string = 'bg-far.png'
-const MID_TEXTURE    : string = 'bg-mid.png'
+const CANVAS_WIDTH   = 512
+const CANVAS_HEIGHT  = 384
+const TEXTURE_WIDTH  = 512
+const TEXTURE_HEIGHT = 256
+const FAR_TEXTURE    = 'bg-far.png'
+const MID_TEXTURE    = 'bg-mid.png'
+const SCROLL_SPEED   = 5
 
 window.addEventListener('DOMContentLoaded', initGame)
 
@@ -40,6 +41,7 @@ function initGame() : void {
     , TEXTURE_HEIGHT
     , FAR_TEXTURE
     , MID_TEXTURE
+    , SCROLL_SPEED
   })
   game.start()
 }

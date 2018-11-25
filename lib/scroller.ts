@@ -10,8 +10,9 @@ interface ScrollerOpts {
 }
 
 export default class Scroller {
-  _far : TextureTilingSprite
-  _mid : TextureTilingSprite
+  _far       : TextureTilingSprite
+  _mid       : TextureTilingSprite
+  _viewportX : number
 
   constructor(stage : P.Container, {
       TEXTURE_WIDTH
@@ -20,6 +21,7 @@ export default class Scroller {
     , MID_TEXTURE
     , fullUrl
   } : ScrollerOpts) {
+
     this._far = new TextureTilingSprite({
         url: fullUrl(FAR_TEXTURE)
       , x: 0
@@ -28,6 +30,7 @@ export default class Scroller {
       , textureHeight: TEXTURE_HEIGHT
       , deltaX: 0.128
     })
+
     this._mid = new TextureTilingSprite({
         url: fullUrl(MID_TEXTURE)
       , x: 0
@@ -36,12 +39,20 @@ export default class Scroller {
       , textureHeight: TEXTURE_HEIGHT
       , deltaX: 0.64
     })
+
     stage.addChild(this._far)
     stage.addChild(this._mid)
+
+    this._viewportX = 0
   }
 
-  update() {
-    this._far.update()
-    this._mid.update()
+  get viewportX() {
+    return this._viewportX
+  }
+
+  set viewportX(val : number) {
+    this._viewportX = val
+    this._far.viewportX = val
+    this._mid.viewportX = val
   }
 }

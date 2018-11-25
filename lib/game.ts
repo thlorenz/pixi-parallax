@@ -7,12 +7,14 @@ interface GameOpts {
   , TEXTURE_HEIGHT : number
   , FAR_TEXTURE    : string
   , MID_TEXTURE    : string
+  , SCROLL_SPEED   : number
 }
 
 export default class Game {
   _app         : P.Application
   _resourceUrl : string
   _scroller    : Scroller;
+  _scrollSpeed : number
 
   constructor(app : P.Application, {
       RESOURCE_URL
@@ -20,6 +22,7 @@ export default class Game {
     , TEXTURE_HEIGHT
     , FAR_TEXTURE
     , MID_TEXTURE
+    , SCROLL_SPEED
   } : GameOpts) {
     this._bind()
 
@@ -32,6 +35,7 @@ export default class Game {
       , MID_TEXTURE
       , fullUrl: this._fullUrl
     })
+    this._scrollSpeed = SCROLL_SPEED
   }
 
   _bind() :void {
@@ -44,7 +48,7 @@ export default class Game {
   }
 
   update() : void {
-    this._scroller.update()
+    this._scroller.viewportX += this._scrollSpeed
   }
 
   dispose() : void {

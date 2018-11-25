@@ -11,6 +11,7 @@ interface TextureTilingSpriteOpts {
 
 export default class TextureTilingSprite extends P.extras.TilingSprite {
   _deltaX: number
+  _viewportX: number
 
   constructor ({
       url
@@ -31,10 +32,13 @@ export default class TextureTilingSprite extends P.extras.TilingSprite {
     this.tilePosition.x = 0
     this.tilePosition.y = 0
 
+    this._viewportX = 0
     this._deltaX = deltaX
   }
 
-  update() {
-    this.tilePosition.x -= this._deltaX
+  set viewportX(val : number) {
+    const distanceToTravel = val - this._viewportX
+    this._viewportX = val
+    this.tilePosition.x -= (distanceToTravel * this._deltaX)
   }
 }
