@@ -1,0 +1,42 @@
+{
+  "name": "pixi-parallax",
+  "version": "0.0.0",
+  "description": "Project setup to hack on pixijs apps with as little transpilation as possible.",
+  "main": "pixi-parallax.js",
+  "scripts": {
+    "start": "parcel index.html",
+    "start:server": "cd ./resources && http-server -p 1235 --cors=*",
+    "build": "parcel build index.html"
+  },
+  "browserslist": {
+    "development": [
+      "last 1 chrome version"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/thlorenz/pixi-parallax.git"
+  },
+  "homepage": "https://github.com/thlorenz/pixi-parallax",
+  "dependencies": {
+    "pixi.js": "~4.8.2"
+  },
+  "devDependencies": {
+    "@types/pixi.js": "~4.8.3",
+    "http-server": "~0.11.1",
+    "parcel-bundler": "~1.10.3"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Thorsten Lorenz",
+    "email": "thlorenz@gmx.de",
+    "url": "http://thlorenz.com"
+  },
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/thlorenz/pixi-parallax/blob/master/LICENSE"
+  },
+  "engine": {
+    "node": ">=8"
+  }
+}
