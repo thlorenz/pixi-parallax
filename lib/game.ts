@@ -44,28 +44,28 @@ export default class Game {
     this._scrollSpeed = SCROLL_SPEED
   }
 
-  _bind() :void {
+  _bind(): void {
     this._update = this._update.bind(this)
     this._fullUrl = this._fullUrl.bind(this)
     this._onspriteSheetLoaded = this._onspriteSheetLoaded.bind(this)
   }
 
-  start() : void {
+  start(): void {
     this._loadSpriteSheet()
   }
 
-  _update() : void {
+  _update(): void {
     this._scroller.viewportX += this._scrollSpeed
   }
 
-  dispose() : void {
+  dispose(): void {
   }
 
-  _loadSpriteSheet() {
+  _loadSpriteSheet(): void {
     maybeLoad(this._fullUrl('wall.json'), this._onspriteSheetLoaded)
   }
 
-  _onspriteSheetLoaded() {
+  _onspriteSheetLoaded(): void {
     this._app.ticker.add(this._update)
     this._wallPool.load()
     this._generateTestWallSpan()
@@ -73,7 +73,7 @@ export default class Game {
     this._generateTestWallSpan()
   }
 
-  _renderWallSprites(n : number) : void {
+  _renderWallSprites(n: number): void {
     for (let i = 0; i < n; i++) {
       const sprite = (i % 2 === 0)
         ? this._wallPool.borrowWindow()
@@ -86,7 +86,7 @@ export default class Game {
     }
   }
 
-  _removeWallSprites() : void {
+  _removeWallSprites(): void {
     for (let i = 0; i < this._wallSlices.length; i++) {
       const sprite = this._wallSlices[i]
       this._app.stage.removeChild(sprite)
@@ -99,40 +99,47 @@ export default class Game {
     this._wallSlices = []
   }
 
-  _fullUrl(url : string) : string {
+  _fullUrl(url: string): string {
     return `${this._resourceUrl}/${url}`
   }
 
-  _generateTestWallSpan() : void {
+  _generateTestWallSpan(): void {
     const lookupTable : Array<Function> = [
         this._wallPool.borrowFrontEdge  // 1st slice
       , this._wallPool.borrowWindow     // 2nd slice
       , this._wallPool.borrowDecoration // 3rd slice
-      , this._wallPool.borrowWindow     // 4th slice
-      , this._wallPool.borrowDecoration // 5th slice
-      , this._wallPool.borrowWindow     // 6th slice
-      , this._wallPool.borrowBackEdge   // 7th slice
+      , this._wallPool.borrowStep       // 4th slice
+      , this._wallPool.borrowWindow     // 5th slice
+      , this._wallPool.borrowBackEdge   // 6th slice
+    ]
+
+    const posY = [
+        128 // 1st slice
+      , 128 // 2nd slice
+      , 128 // 3rd slice
+      , 192 // 4th slice
+      , 192 // 5th slice
+      , 192 // 6th slice
     ]
 
     for (let i = 0; i < lookupTable.length; i++) {
       const fn = lookupTable[i]
       const sprite = fn.call(this._wallPool)
-      sprite.position.x = 32 + (i * 64)
-      sprite.position.y = 128;
+      sprite.position.x = 64 + (i * 64)
+      sprite.position.y = posY[i]
       this._wallSlices.push(sprite)
       this._app.stage.addChild(sprite)
     }
   }
 
-  _clearTestWallSpan() : void {
+  _clearTestWallSpan(): void {
     const lookupTable : Array<Function> = [
         this._wallPool.returnFrontEdge  // 1st slice
       , this._wallPool.returnWindow     // 2nd slice
       , this._wallPool.returnDecoration // 3rd slice
-      , this._wallPool.returnWindow     // 4th slice
-      , this._wallPool.returnDecoration // 5th slice
-      , this._wallPool.returnWindow     // 6th slice
-      , this._wallPool.returnBackEdge   // 7th slice
+      , this._wallPool.returnStep       // 4th slice
+      , this._wallPool.returnWindow     // 5th slice
+      , this._wallPool.returnBackEdge   // 6th slice
     ]
 
     for (let i = 0; i < lookupTable.length; i++) {

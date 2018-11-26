@@ -1,10 +1,22 @@
 import * as P from 'pixi.js'
 
+function noop() {}
+
+function flip(sprite : P.Sprite) : void {
+  sprite.anchor.x = 1
+  sprite.scale.x = -1
+}
+
+function shiftStep(sprite : P.Sprite) : void {
+  sprite.anchor.y = 0.25
+}
+
 export default class WallSpritesPool {
   _windows     : Array<P.Sprite> = []
   _decorations : Array<P.Sprite> = []
   _frontEdges  : Array<P.Sprite> = []
   _backEdges   : Array<P.Sprite> = []
+  _steps       : Array<P.Sprite> = []
 
   load() : void {
     this
@@ -12,6 +24,7 @@ export default class WallSpritesPool {
       ._createDecorations()
       ._createFrontEdges()
       ._createBackEdges()
+      ._createSteps()
   }
 
   borrowWindow() : P.Sprite  {
@@ -44,6 +57,14 @@ export default class WallSpritesPool {
 
   returnBackEdge(backEdge : P.Sprite) : void {
     this._backEdges.push(backEdge)
+  }
+
+  borrowStep() : P.Sprite  {
+    return this._borrowFrom(this._steps)
+  }
+
+  returnStep(step : P.Sprite) : void {
+    this._steps.push(step)
   }
 
   _borrowFrom<T>(pool : Array<T>) : T {
@@ -79,7 +100,6 @@ export default class WallSpritesPool {
   }
 
   _createBackEdges() : WallSpritesPool {
-    const flip = true
     this
       ._seed(this._backEdges, 'edge_01', 2, flip)
       ._seed(this._backEdges, 'edge_02', 2, flip)
@@ -87,18 +107,20 @@ export default class WallSpritesPool {
     return this
   }
 
+  _createSteps() : WallSpritesPool {
+    this._seed(this._steps, 'step_01', 2, shiftStep)
+    return this
+  }
+
   _seed(
       pool : Array<P.Sprite>
     , frameId : string
     , size : number
-    , flip : boolean = false
+    , customize : Function = noop
   ) : WallSpritesPool {
     for (let i = 0; i < size; i++) {
       const sprite = P.Sprite.fromFrame(frameId)
-      if (flip) {
-        sprite.anchor.x = 1
-        sprite.scale.x = -1
-      }
+      customize(sprite)
       pool.push(sprite)
     }
     return this
