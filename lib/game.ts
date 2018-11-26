@@ -1,5 +1,7 @@
 import * as P from 'pixi.js'
 import Scroller from './scroller'
+import maybeLoad from './maybe-load'
+import WallSpritesPool from './wall-sprites-pool';
 
 interface GameOpts {
     RESOURCE_URL   : string
@@ -15,6 +17,9 @@ export default class Game {
   _resourceUrl : string
   _scroller    : Scroller;
   _scrollSpeed : number
+
+  _wallSlices : Array<P.Sprite> = []
+  _wallPool   : WallSpritesPool
 
   constructor(app : P.Application, {
       RESOURCE_URL
@@ -35,26 +40,107 @@ export default class Game {
       , MID_TEXTURE
       , fullUrl: this._fullUrl
     })
+    this._wallPool = new WallSpritesPool()
     this._scrollSpeed = SCROLL_SPEED
   }
 
   _bind() :void {
-    this.update = this.update.bind(this)
+    this._update = this._update.bind(this)
     this._fullUrl = this._fullUrl.bind(this)
+    this._onspriteSheetLoaded = this._onspriteSheetLoaded.bind(this)
   }
 
   start() : void {
-    this._app.ticker.add(this.update)
+    this._loadSpriteSheet()
   }
 
-  update() : void {
+  _update() : void {
     this._scroller.viewportX += this._scrollSpeed
   }
 
   dispose() : void {
   }
 
+  _loadSpriteSheet() {
+    maybeLoad(this._fullUrl('wall.json'), this._onspriteSheetLoaded)
+  }
+
+  _onspriteSheetLoaded() {
+    this._app.ticker.add(this._update)
+    this._wallPool.load()
+    this._generateTestWallSpan()
+    this._clearTestWallSpan()
+    this._generateTestWallSpan()
+  }
+
+  _renderWallSprites(n : number) : void {
+    for (let i = 0; i < n; i++) {
+      const sprite = (i % 2 === 0)
+        ? this._wallPool.borrowWindow()
+        : this._wallPool.borrowDecoration()
+
+      sprite.position.x = -32 + (i * 64)
+      sprite.position.y = 128
+      this._wallSlices.push(sprite)
+      this._app.stage.addChild(sprite)
+    }
+  }
+
+  _removeWallSprites() : void {
+    for (let i = 0; i < this._wallSlices.length; i++) {
+      const sprite = this._wallSlices[i]
+      this._app.stage.removeChild(sprite)
+      if (i % 2 === 0) {
+        this._wallPool.returnWindow(sprite)
+      } else {
+        this._wallPool.returnDecoration(sprite)
+      }
+    }
+    this._wallSlices = []
+  }
+
   _fullUrl(url : string) : string {
     return `${this._resourceUrl}/${url}`
+  }
+
+  _generateTestWallSpan() : void {
+    const lookupTable : Array<Function> = [
+        this._wallPool.borrowFrontEdge  // 1st slice
+      , this._wallPool.borrowWindow     // 2nd slice
+      , this._wallPool.borrowDecoration // 3rd slice
+      , this._wallPool.borrowWindow     // 4th slice
+      , this._wallPool.borrowDecoration // 5th slice
+      , this._wallPool.borrowWindow     // 6th slice
+      , this._wallPool.borrowBackEdge   // 7th slice
+    ]
+
+    for (let i = 0; i < lookupTable.length; i++) {
+      const fn = lookupTable[i]
+      const sprite = fn.call(this._wallPool)
+      sprite.position.x = 32 + (i * 64)
+      sprite.position.y = 128;
+      this._wallSlices.push(sprite)
+      this._app.stage.addChild(sprite)
+    }
+  }
+
+  _clearTestWallSpan() : void {
+    const lookupTable : Array<Function> = [
+        this._wallPool.returnFrontEdge  // 1st slice
+      , this._wallPool.returnWindow     // 2nd slice
+      , this._wallPool.returnDecoration // 3rd slice
+      , this._wallPool.returnWindow     // 4th slice
+      , this._wallPool.returnDecoration // 5th slice
+      , this._wallPool.returnWindow     // 6th slice
+      , this._wallPool.returnBackEdge   // 7th slice
+    ]
+
+    for (let i = 0; i < lookupTable.length; i++) {
+      const fn = lookupTable[i]
+      const sprite = this._wallSlices[i]
+      this._app.stage.addChild(sprite)
+      fn.call(this._wallPool, sprite)
+    }
+    this._wallSlices = []
   }
 }

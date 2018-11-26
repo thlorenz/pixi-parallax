@@ -2,7 +2,7 @@ import Game from './lib/game'
 import * as P from 'pixi.js'
 
 // See npm run start:server inside package.json
-const RESOURCE_URL = 'http://localhost:1235/'
+const RESOURCE_URL = 'http://localhost:1235'
 P.loader.baseUrl = RESOURCE_URL
 
 const CANVAS_WIDTH   = 512
