@@ -2,6 +2,7 @@ import * as P from 'pixi.js'
 import Scroller from './scroller'
 import maybeLoad from './maybe-load'
 import WallSpritesPool from './wall-sprites-pool';
+import { WallSprite as WS } from './enums'
 
 interface GameOpts {
     RESOURCE_URL   : string
@@ -73,44 +74,18 @@ export default class Game {
     this._generateTestWallSpan()
   }
 
-  _renderWallSprites(n: number): void {
-    for (let i = 0; i < n; i++) {
-      const sprite = (i % 2 === 0)
-        ? this._wallPool.borrowWindow()
-        : this._wallPool.borrowDecoration()
-
-      sprite.position.x = -32 + (i * 64)
-      sprite.position.y = 128
-      this._wallSlices.push(sprite)
-      this._app.stage.addChild(sprite)
-    }
-  }
-
-  _removeWallSprites(): void {
-    for (let i = 0; i < this._wallSlices.length; i++) {
-      const sprite = this._wallSlices[i]
-      this._app.stage.removeChild(sprite)
-      if (i % 2 === 0) {
-        this._wallPool.returnWindow(sprite)
-      } else {
-        this._wallPool.returnDecoration(sprite)
-      }
-    }
-    this._wallSlices = []
-  }
-
   _fullUrl(url: string): string {
     return `${this._resourceUrl}/${url}`
   }
 
   _generateTestWallSpan(): void {
     const lookupTable : Array<Function> = [
-        this._wallPool.borrowFrontEdge  // 1st slice
-      , this._wallPool.borrowWindow     // 2nd slice
-      , this._wallPool.borrowDecoration // 3rd slice
-      , this._wallPool.borrowStep       // 4th slice
-      , this._wallPool.borrowWindow     // 5th slice
-      , this._wallPool.borrowBackEdge   // 6th slice
+        () => this._wallPool.checkout(WS.FrontEdge)  // 1st slice
+      , () => this._wallPool.checkout(WS.Window)     // 2nd slice
+      , () => this._wallPool.checkout(WS.Decoration) // 3rd slice
+      , () => this._wallPool.checkout(WS.Step)       // 4th slice
+      , () => this._wallPool.checkout(WS.Window)     // 5th slice
+      , () => this._wallPool.checkout(WS.BackEdge)   // 6th slice
     ]
 
     const posY = [
@@ -134,12 +109,12 @@ export default class Game {
 
   _clearTestWallSpan(): void {
     const lookupTable : Array<Function> = [
-        this._wallPool.returnFrontEdge  // 1st slice
-      , this._wallPool.returnWindow     // 2nd slice
-      , this._wallPool.returnDecoration // 3rd slice
-      , this._wallPool.returnStep       // 4th slice
-      , this._wallPool.returnWindow     // 5th slice
-      , this._wallPool.returnBackEdge   // 6th slice
+        (x: P.Sprite) => this._wallPool.checkin(WS.FrontEdge, x)
+      , (x: P.Sprite) => this._wallPool.checkin(WS.Window, x)
+      , (x: P.Sprite) => this._wallPool.checkin(WS.Decoration, x)
+      , (x: P.Sprite) => this._wallPool.checkin(WS.Step, x)
+      , (x: P.Sprite) => this._wallPool.checkin(WS.Window, x)
+      , (x: P.Sprite) => this._wallPool.checkin(WS.BackEdge, x)
     ]
 
     for (let i = 0; i < lookupTable.length; i++) {

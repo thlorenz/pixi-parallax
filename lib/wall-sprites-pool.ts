@@ -1,4 +1,5 @@
 import * as P from 'pixi.js'
+import { WallSprite as WS } from './enums'
 
 function noop() {}
 
@@ -27,44 +28,28 @@ export default class WallSpritesPool {
       ._createSteps()
   }
 
-  borrowWindow() : P.Sprite  {
-    return this._borrowFrom(this._windows)
+  checkout(spriteType : WS) : P.Sprite {
+    switch (spriteType) {
+      case WS.Window     : return this._borrowFrom(this._windows)
+      case WS.Decoration : return this._borrowFrom(this._decorations)
+      case WS.FrontEdge  : return this._borrowFrom(this._frontEdges)
+      case WS.BackEdge   : return this._borrowFrom(this._backEdges)
+      case WS.Step       : return this._borrowFrom(this._steps)
+      default:
+        throw new Error(`Unknown sprite type ${spriteType}.`)
+    }
   }
 
-  returnWindow(window : P.Sprite) : void {
-    this._windows.push(window)
-  }
-
-  borrowDecoration() : P.Sprite  {
-    return this._borrowFrom(this._decorations)
-  }
-
-  returnDecoration(decoration : P.Sprite) : void {
-    this._decorations.push(decoration)
-  }
-
-  borrowFrontEdge() : P.Sprite {
-    return this._borrowFrom(this._frontEdges)
-  }
-
-  returnFrontEdge(frontEdge : P.Sprite) : void {
-    this._frontEdges.push(frontEdge)
-  }
-
-  borrowBackEdge() : P.Sprite {
-    return this._borrowFrom(this._backEdges)
-  }
-
-  returnBackEdge(backEdge : P.Sprite) : void {
-    this._backEdges.push(backEdge)
-  }
-
-  borrowStep() : P.Sprite  {
-    return this._borrowFrom(this._steps)
-  }
-
-  returnStep(step : P.Sprite) : void {
-    this._steps.push(step)
+  checkin(spriteType: WS, sprite: P.Sprite): void {
+    switch (spriteType) {
+      case WS.Window     : this._windows.push(sprite); break
+      case WS.Decoration : this._decorations.push(sprite); break
+      case WS.FrontEdge  : this._frontEdges.push(sprite); break
+      case WS.BackEdge   : this._backEdges.push(sprite); break
+      case WS.Step       : this._steps.push(sprite); break
+      default:
+        throw new Error(`Unknown sprite type ${spriteType}.`)
+    }
   }
 
   _borrowFrom<T>(pool : Array<T>) : T {
