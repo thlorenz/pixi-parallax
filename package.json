@@ -5,7 +5,7 @@
   "main": "pixi-parallax.js",
   "scripts": {
     "start": "parcel index.html",
-    "start:server": "cd ./resources && http-server -p 1235 --cors=*",
+    "start:server": "http-server -p 1235 --cors=*",
     "build": "parcel build index.html"
   },
   "browserslist": {
@@ -22,7 +22,9 @@
     "pixi.js": "~4.8.2"
   },
   "devDependencies": {
+    "@types/node": "~10.12.10",
     "@types/pixi.js": "~4.8.3",
+    "cssnano": "~4.1.7",
     "http-server": "~0.11.1",
     "parcel-bundler": "~1.10.3",
     "typescript": "~3.1.6"

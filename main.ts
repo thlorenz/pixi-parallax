@@ -1,8 +1,9 @@
 import Game from './lib/game'
 import * as P from 'pixi.js'
 
+const isprod = process.env.NODE_ENV === 'production'
 // See npm run start:server inside package.json
-const RESOURCE_URL = 'http://localhost:1235'
+const RESOURCE_URL = isprod ? window.origin : 'http://localhost:1235'
 P.loader.baseUrl = RESOURCE_URL
 
 const CANVAS_WIDTH   = 512

@@ -32,8 +32,8 @@ export default class WallSpritesPool {
     switch (spriteType) {
       case WS.Window     : return this._borrowFrom(this._windows)
       case WS.Decoration : return this._borrowFrom(this._decorations)
-      case WS.Front  : return this._borrowFrom(this._frontEdges)
-      case WS.Back   : return this._borrowFrom(this._backEdges)
+      case WS.Front      : return this._borrowFrom(this._frontEdges)
+      case WS.Back       : return this._borrowFrom(this._backEdges)
       case WS.Step       : return this._borrowFrom(this._steps)
       default:
         throw new Error(`Unknown sprite type ${spriteType}.`)
@@ -44,8 +44,8 @@ export default class WallSpritesPool {
     switch (spriteType) {
       case WS.Window     : this._windows.push(sprite); break
       case WS.Decoration : this._decorations.push(sprite); break
-      case WS.Front  : this._frontEdges.push(sprite); break
-      case WS.Back   : this._backEdges.push(sprite); break
+      case WS.Front      : this._frontEdges.push(sprite); break
+      case WS.Back       : this._backEdges.push(sprite); break
       case WS.Step       : this._steps.push(sprite); break
       default:
         throw new Error(`Unknown sprite type ${spriteType}.`)

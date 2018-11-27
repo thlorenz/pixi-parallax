@@ -84,6 +84,6 @@ export default class Game {
   }
 
   _fullUrl(url: string): string {
-    return `${this._resourceUrl}/${url}`
+    return `${this._resourceUrl}/resources/${url}`
   }
 }
