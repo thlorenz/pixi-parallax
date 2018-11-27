@@ -11,13 +11,14 @@ const TEXTURE_WIDTH  = 512
 const TEXTURE_HEIGHT = 256
 const FAR_TEXTURE    = 'bg-far.png'
 const MID_TEXTURE    = 'bg-mid.png'
-const SCROLL_SPEED   = 5
+const MIN_SCROLL_SPEED = 5
+const MAX_SCROLL_SPEED = 15
+const SCROLL_ACCELERATION = 0.005
 
 window.addEventListener('DOMContentLoaded', initGame)
 
 let game : Game
 function removeExistingGame() : void {
-  if (game != null) game.dispose()
   const els = document.body.children
   if (els.length > 0) document.body.removeChild(els.item(0) as Node)
 }
@@ -41,7 +42,9 @@ function initGame() : void {
     , TEXTURE_HEIGHT
     , FAR_TEXTURE
     , MID_TEXTURE
-    , SCROLL_SPEED
+    , MIN_SCROLL_SPEED
+    , MAX_SCROLL_SPEED    
+    , SCROLL_ACCELERATION 
   })
   game.start()
 }

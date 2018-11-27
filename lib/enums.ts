@@ -1,7 +1,8 @@
 export enum WallSprite {
     Window
   , Decoration
-  , FrontEdge
-  , BackEdge
+  , Front
+  , Back
   , Step
+  , Gap
 }

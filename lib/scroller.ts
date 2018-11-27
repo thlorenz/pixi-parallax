@@ -1,5 +1,7 @@
 import * as P from 'pixi.js'
 import TextureTilingSprite from './texture-tiling-sprite'
+import Walls from './walls'
+import MapBuilder from './map-builder';
 
 interface ScrollerOpts {
     TEXTURE_WIDTH  : number
@@ -10,11 +12,13 @@ interface ScrollerOpts {
 }
 
 export default class Scroller {
-  _far       : TextureTilingSprite
-  _mid       : TextureTilingSprite
-  _viewportX : number
+  _far        : TextureTilingSprite
+  _mid        : TextureTilingSprite
+  _front      : Walls
+  _mapBuilder : MapBuilder
+  _viewportX  : number
 
-  constructor(stage : P.Container, {
+  constructor(stage : P.Container, walls: Walls, {
       TEXTURE_WIDTH
     , TEXTURE_HEIGHT
     , FAR_TEXTURE
@@ -28,7 +32,7 @@ export default class Scroller {
       , y: 0
       , textureWidth: TEXTURE_WIDTH
       , textureHeight: TEXTURE_HEIGHT
-      , deltaX: 0.128
+      , deltaX: 0.064
     })
 
     this._mid = new TextureTilingSprite({
@@ -37,13 +41,21 @@ export default class Scroller {
       , y: TEXTURE_HEIGHT / 2
       , textureWidth: TEXTURE_WIDTH
       , textureHeight: TEXTURE_HEIGHT
-      , deltaX: 0.64
+      , deltaX: 0.32
     })
+    this._front = walls
+
+    this._mapBuilder = new MapBuilder(this._front)
 
     stage.addChild(this._far)
     stage.addChild(this._mid)
+    stage.addChild(this._front)
 
     this._viewportX = 0
+  }
+
+  init() {
+    this._mapBuilder.init()
   }
 
   get viewportX() {
@@ -54,5 +66,6 @@ export default class Scroller {
     this._viewportX = val
     this._far.viewportX = val
     this._mid.viewportX = val
+    this._front.viewportX = val
   }
 }

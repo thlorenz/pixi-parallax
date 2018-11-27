@@ -2,25 +2,30 @@ import * as P from 'pixi.js'
 import Scroller from './scroller'
 import maybeLoad from './maybe-load'
 import WallSpritesPool from './wall-sprites-pool';
-import { WallSprite as WS } from './enums'
+import Walls from './walls'
 
 interface GameOpts {
-    RESOURCE_URL   : string
-  , TEXTURE_WIDTH  : number
-  , TEXTURE_HEIGHT : number
-  , FAR_TEXTURE    : string
-  , MID_TEXTURE    : string
-  , SCROLL_SPEED   : number
+    RESOURCE_URL        : string
+  , TEXTURE_WIDTH       : number
+  , TEXTURE_HEIGHT      : number
+  , FAR_TEXTURE         : string
+  , MID_TEXTURE         : string
+  , MIN_SCROLL_SPEED    : number
+  , MAX_SCROLL_SPEED    : number
+  , SCROLL_ACCELERATION : number
 }
 
 export default class Game {
-  _app         : P.Application
-  _resourceUrl : string
-  _scroller    : Scroller;
-  _scrollSpeed : number
+  _app                : P.Application
+  _resourceUrl        : string
+  _scroller           : Scroller;
+  _scrollSpeed        : number
+  _maxScrollSpeed     : number
+  _scrollAcceleration : number
 
   _wallSlices : Array<P.Sprite> = []
   _wallPool   : WallSpritesPool
+  _walls      : Walls
 
   constructor(app : P.Application, {
       RESOURCE_URL
@@ -28,21 +33,26 @@ export default class Game {
     , TEXTURE_HEIGHT
     , FAR_TEXTURE
     , MID_TEXTURE
-    , SCROLL_SPEED
+    , MIN_SCROLL_SPEED
+    , MAX_SCROLL_SPEED
+    , SCROLL_ACCELERATION
   } : GameOpts) {
     this._bind()
 
     this._app = app
     this._resourceUrl = RESOURCE_URL
-    this._scroller = new Scroller(this._app.stage, {
+    this._wallPool = new WallSpritesPool()
+    this._walls = new Walls(this._wallPool)
+    this._scroller = new Scroller(this._app.stage, this._walls, {
         TEXTURE_WIDTH
       , TEXTURE_HEIGHT
       , FAR_TEXTURE
       , MID_TEXTURE
       , fullUrl: this._fullUrl
     })
-    this._wallPool = new WallSpritesPool()
-    this._scrollSpeed = SCROLL_SPEED
+    this._scrollSpeed = MIN_SCROLL_SPEED
+    this._maxScrollSpeed = MAX_SCROLL_SPEED
+    this._scrollAcceleration = SCROLL_ACCELERATION
   }
 
   _bind(): void {
@@ -57,9 +67,10 @@ export default class Game {
 
   _update(): void {
     this._scroller.viewportX += this._scrollSpeed
-  }
-
-  dispose(): void {
+    this._scrollSpeed += this._scrollAcceleration
+    if (this._scrollSpeed > this._maxScrollSpeed) {
+      this._scrollSpeed = this._maxScrollSpeed
+    }
   }
 
   _loadSpriteSheet(): void {
@@ -69,60 +80,10 @@ export default class Game {
   _onspriteSheetLoaded(): void {
     this._app.ticker.add(this._update)
     this._wallPool.load()
-    this._generateTestWallSpan()
-    this._clearTestWallSpan()
-    this._generateTestWallSpan()
+    this._scroller.init()
   }
 
   _fullUrl(url: string): string {
     return `${this._resourceUrl}/${url}`
-  }
-
-  _generateTestWallSpan(): void {
-    const lookupTable : Array<Function> = [
-        () => this._wallPool.checkout(WS.FrontEdge)  // 1st slice
-      , () => this._wallPool.checkout(WS.Window)     // 2nd slice
-      , () => this._wallPool.checkout(WS.Decoration) // 3rd slice
-      , () => this._wallPool.checkout(WS.Step)       // 4th slice
-      , () => this._wallPool.checkout(WS.Window)     // 5th slice
-      , () => this._wallPool.checkout(WS.BackEdge)   // 6th slice
-    ]
-
-    const posY = [
-        128 // 1st slice
-      , 128 // 2nd slice
-      , 128 // 3rd slice
-      , 192 // 4th slice
-      , 192 // 5th slice
-      , 192 // 6th slice
-    ]
-
-    for (let i = 0; i < lookupTable.length; i++) {
-      const fn = lookupTable[i]
-      const sprite = fn.call(this._wallPool)
-      sprite.position.x = 64 + (i * 64)
-      sprite.position.y = posY[i]
-      this._wallSlices.push(sprite)
-      this._app.stage.addChild(sprite)
-    }
-  }
-
-  _clearTestWallSpan(): void {
-    const lookupTable : Array<Function> = [
-        (x: P.Sprite) => this._wallPool.checkin(WS.FrontEdge, x)
-      , (x: P.Sprite) => this._wallPool.checkin(WS.Window, x)
-      , (x: P.Sprite) => this._wallPool.checkin(WS.Decoration, x)
-      , (x: P.Sprite) => this._wallPool.checkin(WS.Step, x)
-      , (x: P.Sprite) => this._wallPool.checkin(WS.Window, x)
-      , (x: P.Sprite) => this._wallPool.checkin(WS.BackEdge, x)
-    ]
-
-    for (let i = 0; i < lookupTable.length; i++) {
-      const fn = lookupTable[i]
-      const sprite = this._wallSlices[i]
-      this._app.stage.addChild(sprite)
-      fn.call(this._wallPool, sprite)
-    }
-    this._wallSlices = []
   }
 }
